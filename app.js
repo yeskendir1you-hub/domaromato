@@ -410,6 +410,9 @@
   }
   window.addEventListener("resize", syncTop);
 
+  var curV = document.documentElement.getAttribute("data-theme") || "classic";
+  document.querySelectorAll(".variants a").forEach(function (a) { a.setAttribute("aria-current", String(a.dataset.v === curV)); });
+
   syncTop();
   render();
   updateBadge(false);

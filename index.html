@@ -12,8 +12,16 @@
   <link rel="icon" type="image/png" href="/assets/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Prata&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prata&family=Manrope:wght@400;500;600;700&family=Inter+Tight:wght@400;500;600&family=Unbounded:wght@400;500&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
+  <script>
+    (function () {
+      var v = new URLSearchParams(location.search).get("v");
+      if (["light", "noir", "blush"].indexOf(v) > -1) document.documentElement.setAttribute("data-theme", v);
+      var m = { light: "#f5f2ed", noir: "#050505", blush: "#f7ece7" };
+      if (m[v]) document.querySelector('meta[name="theme-color"]').content = m[v];
+    })();
+  </script>
 </head>
 <body>
   <a class="skip" href="#catalog">К каталогу</a>
@@ -245,6 +253,13 @@
     </div>
   </aside>
 
+  <nav class="variants" aria-label="Варианты дизайна">
+    <span>Дизайн:</span>
+    <a href="/?v=light" data-v="light">1 · Минимал</a>
+    <a href="/?v=noir" data-v="noir">2 · Нуар</a>
+    <a href="/?v=blush" data-v="blush">3 · Пудра</a>
+    <a href="/" data-v="classic">4 · Классика</a>
+  </nav>
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
   <script src="/data.js"></script>
