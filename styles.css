@@ -36,6 +36,7 @@ img { max-width: 100%; display: block; }
 a { color: inherit; text-underline-offset: .22em; text-decoration-thickness: 1px; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
+button, a, select, label { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 ::selection { background: var(--gold); color: var(--bg); }
 :focus-visible { outline: 2px solid var(--gold-hi); outline-offset: 3px; border-radius: 8px; }
 input, textarea { caret-color: var(--gold); }
@@ -227,7 +228,7 @@ html:not(.js) .st { position: static; opacity: 1; padding: 40px var(--gutter); }
 .v-band { fill: var(--gold); }
 .v-liq { fill: var(--liq); transition: transform 1s var(--ease-out); }
 .v-shine { fill: rgba(255, 255, 255, .32); }
-.p.pour .v-liq { animation: vslosh 1.2s var(--ease-out); }
+.p.slosh .v-liq { animation: vslosh 1.2s var(--ease-out); }
 @keyframes vslosh { 0% { transform: translateY(var(--lvl)); } 45% { transform: translateY(calc(var(--lvl) - 9px)); } 100% { transform: translateY(var(--lvl)); } }
 .p-head { min-width: 0; }
 .p-brand { margin: 0; font-size: .7rem; letter-spacing: .22em; text-transform: uppercase; color: var(--gold); font-weight: 600; }
@@ -332,3 +333,5 @@ html:not(.js) .st { position: static; opacity: 1; padding: 40px var(--gutter); }
   .st { position: static !important; opacity: 1 !important; translate: none; text-align: left !important; }
   .pour-meter { display: none; }
 }
+.bar { transition: background-color .4s, backdrop-filter .4s, border-color .4s; border-bottom: 1px solid transparent; }
+.bar.solid { background: rgba(7, 6, 5, .82); backdrop-filter: blur(16px) saturate(1.2); -webkit-backdrop-filter: blur(16px) saturate(1.2); border-bottom-color: var(--line); }

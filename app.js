@@ -228,7 +228,7 @@
     // card feedback: liquid rises & sloshes
     var liq = art.querySelector(".v-liq");
     liq.style.setProperty("--lvl", lvl(p.id));
-    art.classList.remove("pour"); void art.offsetWidth; art.classList.add("pour");
+    art.classList.remove("slosh"); void art.offsetWidth; art.classList.add("slosh");
     var tag = art.querySelector(".in-set");
     if (!tag) { tag = document.createElement("span"); tag.className = "in-set"; art.appendChild(tag); }
     tag.textContent = "В сэте: " + qtyOf(p.id);

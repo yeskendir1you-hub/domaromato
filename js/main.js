@@ -12,6 +12,12 @@
   var baseLift = mobile ? 0.55 : 0;
   S.lift = baseLift;
 
+  /* ---------- header gets a solid backdrop once the page moves ---------- */
+  var barEl = document.querySelector(".bar");
+  function syncBar() { barEl.classList.toggle("solid", window.scrollY > 40); }
+  window.addEventListener("scroll", syncBar, { passive: true });
+  syncBar();
+
   /* ---------- intro ---------- */
   var intro = $("#intro"), bar = $("#introBar");
   var sceneReady = false, introDone = false;
