@@ -21,7 +21,9 @@ window.DA_CONFIG = {
 /* gender: w — женский, m — мужской, u — унисекс, null — уточняется
    family: fresh | floral | woody | oriental | gourmand | musk | null
    color: оттенок «жидкости» во флаконе на сайте
-   notes: null — ноты не указаны (покупатель увидит «уточните в WhatsApp») */
+   notes: null — ноты не указаны (покупатель увидит «уточните в WhatsApp»)
+   photo: "/assets/bottles/creed-aventus.png" — необязательно. Своё фото флакона (лучше PNG без фона);
+          если указано, на сайте будет фото вместо нарисованного флакона. */
 window.DA_PERFUMES = [
   { id: "lv-symphony",      brand: "Louis Vuitton", name: "Symphony",              gender: "u", family: "fresh",    tier: "lux",     color: "#e8d27f", notes: "грейпфрут, имбирь, бергамот" },
   { id: "lv-imagination",   brand: "Louis Vuitton", name: "Imagination",           gender: "m", family: "fresh",    tier: "lux",     color: "#d8bf73", notes: "цитрон, чёрный чай, амбра" },

@@ -81,10 +81,9 @@
       lenis.scrollTo(el, { offset: id === "#top" ? 0 : -70, duration: 1.6 });
     });
     // freeze page while the set drawer is open
-    var drawer = $("#setDrawer");
     new MutationObserver(function () {
-      if (drawer.classList.contains("on")) lenis.stop(); else lenis.start();
-    }).observe(drawer, { attributes: true, attributeFilter: ["class"] });
+      if (document.body.classList.contains("locked")) lenis.stop(); else lenis.start();
+    }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
   }
 
   /* ---------- the pour (pinned section) ---------- */
@@ -174,8 +173,8 @@
     });
     // product cards: tilt toward the cursor
     document.addEventListener("pointermove", function (e) {
-      var card = e.target.closest && e.target.closest(".p");
-      $$(".p.tilt").forEach(function (c) { if (c !== card) { c.classList.remove("tilt"); c.style.removeProperty("--rx"); c.style.removeProperty("--ry"); } });
+      var card = e.target.closest && e.target.closest(".p-stage");
+      $$(".p-stage.tilt").forEach(function (c) { if (c !== card) { c.classList.remove("tilt"); c.style.removeProperty("--rx"); c.style.removeProperty("--ry"); } });
       if (!card) return;
       var r = card.getBoundingClientRect();
       card.classList.add("tilt");

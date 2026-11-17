@@ -107,22 +107,14 @@
     return String(s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; });
   }
 
-  /* ---------- vial svg ---------- */
+  /* ---------- bottle art ---------- */
   function qtyOf(id) { return cart.reduce(function (s, l) { return s + (l.id === id ? l.qty : 0); }, 0); }
-  function lvl(id) { return Math.max(4, 30 - qtyOf(id) * 8) + "px"; }
-  function vialSVG(p, uid) {
-    var cid = "vc-" + uid;
-    return '<svg viewBox="0 0 40 100" aria-hidden="true">' +
-      '<defs><clipPath id="' + cid + '"><rect x="6" y="24" width="28" height="74" rx="6"/></clipPath></defs>' +
-      '<rect class="v-glass" x="6" y="24" width="28" height="74" rx="6"/>' +
-      '<g clip-path="url(#' + cid + ')"><rect class="v-liq" x="0" y="24" width="40" height="80" style="--lvl:' + lvl(p.id) + ';transform:translateY(var(--lvl))"/></g>' +
-      '<rect class="v-shine" x="10" y="32" width="2.5" height="52" rx="1.2"/>' +
-      '<rect class="v-glass" x="6" y="24" width="28" height="74" rx="6" style="fill:none"/>' +
-      '<rect class="v-cap" x="15" y="18" width="10" height="7" rx="1"/>' +
-      '<rect class="v-cap" x="11" y="0" width="18" height="18" rx="3"/>' +
-      '<rect class="v-band" x="11" y="14" width="18" height="2.5"/>' +
-      "</svg>";
+  var uidN = 0;
+  function bottleArt(p, cls) {
+    if (p.photo) return '<img class="' + (cls || "") + ' p-photo" src="' + esc(p.photo) + '" alt="" loading="lazy">';
+    return window.DA_BOTTLE ? window.DA_BOTTLE(p, (uidN++).toString(36)) : "";
   }
+  var DEFAULT_VOL = VOLS.indexOf(10) > -1 ? 10 : VOLS[0];
 
   /* ---------- catalog ---------- */
   var grid = $("#grid");
@@ -148,33 +140,26 @@
   }
 
   function card(p, i) {
-    var v = chosenVol[p.id] || VOLS[1] || VOLS[0];
-    chosenVol[p.id] = v;
-    var tags = [];
-    if (p.gender) tags.push(GENDER_LABEL[p.gender]);
-    if (p.family) tags.push(FAMILY_LABEL[p.family]);
+    var meta = [];
+    if (p.gender) meta.push(GENDER_LABEL[p.gender]);
+    if (p.family) meta.push(FAMILY_LABEL[p.family]);
     var q = qtyOf(p.id);
     var el = document.createElement("article");
     el.className = "p"; el.dataset.id = p.id;
     el.style.setProperty("--liq", p.color);
-    el.style.animationDelay = Math.min(i, 12) * 35 + "ms";
+    el.style.animationDelay = Math.min(i, 12) * 40 + "ms";
     el.innerHTML =
-      '<div class="p-vial">' + vialSVG(p, p.id) + "</div>" +
-      '<div class="p-head">' +
+      '<button type="button" class="p-stage" aria-label="Подробнее: ' + esc(titleOf(p)) + '">' +
+        '<span class="p-glow" aria-hidden="true"></span>' + bottleArt(p) +
+        '<span class="in-set"' + (q ? "" : " hidden") + ">В сэте · " + q + "</span>" +
+      "</button>" +
+      '<div class="p-info">' +
         '<p class="p-brand">' + esc(brandOf(p)) + "</p>" +
-        '<h3 class="p-name">' + esc(p.name) + "</h3>" +
-        (p.notes ? '<p class="p-notes">' + esc(p.notes) + "</p>"
-                 : '<p class="p-notes unknown">Расскажем о нотах в WhatsApp или в эфире</p>') +
-        (tags.length ? '<div class="p-tags">' + tags.map(function (t) { return '<span class="tag">' + t + "</span>"; }).join("") + "</div>" : "") +
-      "</div>" +
-      '<div class="p-actions">' +
-        '<div class="vols" role="radiogroup" aria-label="Объём ' + esc(p.name) + '">' +
-          VOLS.map(function (x) { return '<button type="button" class="vol" role="radio" aria-checked="' + (x === v) + '" data-v="' + x + '">' + x + " мл</button>"; }).join("") +
-        "</div>" +
-        '<div class="p-buy"><span class="price">' + fmt(price(p, v)) + "</span>" +
-        '<button type="button" class="add" aria-label="Добавить ' + esc(titleOf(p)) + ' в сэт"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg>В сэт</button></div>' +
-      "</div>" +
-      (q ? '<span class="in-set">В сэте: ' + q + "</span>" : "");
+        '<h3 class="p-name"><button type="button" class="p-open">' + esc(p.name) + "</button></h3>" +
+        '<p class="p-meta">' + (meta.length ? meta.join(" · ") : "Селекция") + "</p>" +
+        '<div class="p-row"><span class="price"><small>от</small> ' + fmt(price(p, VOLS[0])) + "</span>" +
+        '<button type="button" class="add" aria-label="Добавить ' + esc(titleOf(p)) + ", " + DEFAULT_VOL + ' мл, в сэт"><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 4v12M4 10h12"/></svg></button></div>' +
+      "</div>";
     return el;
   }
 
@@ -209,32 +194,73 @@
   grid.addEventListener("click", function (e) {
     var art = e.target.closest(".p"); if (!art) return;
     var p = byId[art.dataset.id];
-    var vb = e.target.closest(".vol");
-    if (vb) {
-      chosenVol[p.id] = +vb.dataset.v;
-      art.querySelectorAll(".vol").forEach(function (b) { b.setAttribute("aria-checked", String(b === vb)); });
-      art.querySelector(".price").textContent = fmt(price(p, chosenVol[p.id]));
-      return;
-    }
     var add = e.target.closest(".add");
-    if (add) addToSet(p, chosenVol[p.id], art, add);
+    if (add) { addToSet(p, DEFAULT_VOL, add); return; }
+    if (e.target.closest(".p-stage, .p-open")) openSheet(p);
+  });
+
+  /* ---------- product sheet ---------- */
+  var sheet = $("#sheet"), shScrim = $("#sheetScrim"), shP = null, shVol = DEFAULT_VOL, shLast = null;
+  function openSheet(p) {
+    shP = p; shVol = DEFAULT_VOL; shLast = document.activeElement;
+    sheet.style.setProperty("--liq", p.color);
+    $("#shStage").innerHTML = '<span class="p-glow" aria-hidden="true"></span>' + bottleArt(p, "sh-art");
+    $("#shBrand").textContent = brandOf(p);
+    $("#shName").textContent = p.name;
+    var tags = [];
+    if (p.gender) tags.push(GENDER_LABEL[p.gender]);
+    if (p.family) tags.push(FAMILY_LABEL[p.family]);
+    $("#shTags").innerHTML = tags.map(function (t) { return '<span class="tag">' + t + "</span>"; }).join("");
+    $("#shNotes").innerHTML = p.notes
+      ? p.notes.split(/,\s*/).map(function (n) { return '<span class="note">' + esc(n) + "</span>"; }).join("")
+      : '<span class="note-unknown">Подробно расскажем о нотах, шлейфе и стойкости в WhatsApp или в эфире.</span>';
+    renderVols();
+    $("#shAsk").href = waLink("Здравствуйте! Расскажите, пожалуйста, про аромат " + titleOf(p) + ".");
+    sheet.hidden = false; shScrim.hidden = false;
+    requestAnimationFrame(function () { sheet.classList.add("on"); shScrim.classList.add("on"); });
+    document.body.classList.add("locked");
+    setTimeout(function () { $("#shClose").focus(); }, 80);
+  }
+  function renderVols() {
+    $("#shVols").innerHTML = VOLS.map(function (v) {
+      return '<button type="button" class="sh-vol" role="radio" aria-checked="' + (v === shVol) + '" data-v="' + v + '">' +
+        "<b>" + v + " мл</b><span>" + fmt(price(shP, v)) + "</span></button>";
+    }).join("");
+    $("#shAddLabel").textContent = "В сэт · " + fmt(price(shP, shVol));
+  }
+  function closeSheet() {
+    sheet.classList.remove("on"); shScrim.classList.remove("on");
+    if ($("#setDrawer").hidden) document.body.classList.remove("locked");
+    setTimeout(function () { sheet.hidden = true; shScrim.hidden = true; }, reduced ? 0 : 500);
+    if (shLast) shLast.focus();
+  }
+  $("#shVols").addEventListener("click", function (e) {
+    var b = e.target.closest(".sh-vol"); if (!b) return;
+    shVol = +b.dataset.v; renderVols();
+  });
+  $("#shAdd").addEventListener("click", function () { addToSet(shP, shVol, $("#shAdd")); });
+  $("#shClose").addEventListener("click", closeSheet);
+  shScrim.addEventListener("click", closeSheet);
+  document.addEventListener("keydown", function (e) {
+    if (sheet.hidden) return;
+    if (e.key === "Escape") closeSheet();
+    if (e.key === "Tab") {
+      var f = Array.prototype.filter.call(sheet.querySelectorAll("button, a[href]"), function (x) { return x.offsetParent !== null; });
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
   });
 
   /* ---------- set ---------- */
-  function addToSet(p, vol, art, btn) {
+  function addToSet(p, vol, btn) {
     var line = cart.find(function (l) { return l.id === p.id && l.vol === vol; });
     if (line) line.qty++; else cart.push({ id: p.id, vol: vol, qty: 1 });
     save();
-    // card feedback: liquid rises & sloshes
-    var liq = art.querySelector(".v-liq");
-    liq.style.setProperty("--lvl", lvl(p.id));
-    art.classList.remove("slosh"); void art.offsetWidth; art.classList.add("slosh");
-    var tag = art.querySelector(".in-set");
-    if (!tag) { tag = document.createElement("span"); tag.className = "in-set"; art.appendChild(tag); }
-    tag.textContent = "В сэте: " + qtyOf(p.id);
+    syncCards();
+    var art = grid.querySelector('.p[data-id="' + p.id + '"]');
+    if (art) { art.classList.remove("added"); void art.offsetWidth; art.classList.add("added"); }
     btn.classList.add("done");
-    btn.lastChild.textContent = "Добавлено";
-    setTimeout(function () { btn.classList.remove("done"); btn.lastChild.textContent = "В сэт"; }, 1400);
+    setTimeout(function () { btn.classList.remove("done"); }, 1200);
     flyDrop(btn, p.color, function () { updateBadge(true); });
     toast(titleOf(p) + ", " + vol + " мл — в сэте");
   }
@@ -290,18 +316,12 @@
     $("#orderForm").hidden = cart.length === 0;
     $("#sumQty").textContent = t.qty;
     $("#sumTotal").textContent = fmt(t.sum);
-    // shelf of vials — one per bottle in the set
+    // shelf of bottles — one per bottle in the set
     var shelf = "";
-    cart.forEach(function (l, li) {
+    cart.forEach(function (l) {
       for (var k = 0; k < l.qty && k < 12; k++) {
-        var p = byId[l.id];
-        var h = l.vol === 5 ? 0.62 : l.vol === 10 ? 0.8 : 1;
-        shelf += '<svg viewBox="0 0 40 100" style="--liq:' + p.color + ";height:" + Math.round(64 * h) + 'px;width:auto" aria-hidden="true">' +
-          '<rect class="v-glass" x="6" y="24" width="28" height="74" rx="6"/>' +
-          '<rect x="8" y="40" width="24" height="56" rx="4" style="fill:var(--liq)"/>' +
-          '<rect class="v-shine" x="10" y="32" width="2.5" height="52" rx="1.2"/>' +
-          '<rect class="v-cap" x="11" y="0" width="18" height="18" rx="3"/><rect class="v-cap" x="15" y="18" width="10" height="7" rx="1"/>' +
-          '<rect class="v-band" x="11" y="14" width="18" height="2.5"/></svg>';
+        var h = l.vol === 5 ? 46 : l.vol === 10 ? 56 : 66;
+        shelf += '<span class="shelf-b" style="height:' + h + 'px">' + bottleArt(byId[l.id]) + "</span>";
       }
     });
     $("#shelf").innerHTML = shelf;
@@ -319,11 +339,8 @@
 
   function syncCards() {
     grid.querySelectorAll(".p").forEach(function (art) {
-      var id = art.dataset.id, q = qtyOf(id);
-      art.querySelector(".v-liq").style.setProperty("--lvl", lvl(id));
-      var tag = art.querySelector(".in-set");
-      if (q) { if (!tag) { tag = document.createElement("span"); tag.className = "in-set"; art.appendChild(tag); } tag.textContent = "В сэте: " + q; }
-      else if (tag) tag.remove();
+      var q = qtyOf(art.dataset.id), tag = art.querySelector(".in-set");
+      tag.hidden = !q; tag.textContent = "В сэте · " + q;
     });
   }
 
