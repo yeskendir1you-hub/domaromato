@@ -25,7 +25,7 @@ try {
 if (renderer) start();
 
 function start() {
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, mobile ? 1.75 : 2));
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, mobile ? 1.3 : 1.75));
   renderer.setClearColor(0x070605, 1);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.05;
@@ -185,7 +185,7 @@ function start() {
   }
 
   /* ---------- gold dust ---------- */
-  const N = mobile ? 260 : 700;
+  const N = mobile ? 140 : 600;
   const pGeo = new THREE.BufferGeometry();
   const pos = new Float32Array(N * 3), spd = new Float32Array(N);
   for (let i = 0; i < N; i++) {

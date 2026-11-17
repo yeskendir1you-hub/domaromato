@@ -63,7 +63,9 @@
 
   /* ---------- smooth scroll ---------- */
   var lenis = null;
-  if (!reduced && window.Lenis) {
+  ScrollTrigger.config({ ignoreMobileResize: true });
+  if (!fine) document.documentElement.classList.add("native-scroll");
+  if (!reduced && window.Lenis && fine) {
     lenis = new Lenis({ lerp: 0.085, wheelMultiplier: 1, smoothWheel: true });
     window.DA_LENIS = lenis;
     lenis.on("scroll", ScrollTrigger.update);
